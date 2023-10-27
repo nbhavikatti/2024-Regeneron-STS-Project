@@ -5,49 +5,102 @@
 			int cache_functionLRU (int M, int *global_time, int write_or_not, int id, 
 				int *id_Array, int *timestamps, int *write_or_no, int *nextyounger, int *nextolder, int *oldest, int *youngest,
 				int *read, int *write, int *index_in_cache) {
+					/*
+				printf("%s", "id_Array: ");
+				for (int i = 0; i < 6; i++) {
+				printf("%d ", id_Array[i]);
+				}
+				printf("\n");
+				printf("%s", "timestamps: ");
+				for (int i = 0; i < 6; i++) {
+				printf("%d ", timestamps[i]);
+				}
+				printf("\n");
+				printf("%s", "write_or_no: ");
+				for (int i = 0; i < 6; i++) {
+				printf("%d ", write_or_no[i]);
+				}
+				printf("\n");
+				printf("%s", "nextyounger: ");
+				for (int i = 0; i < 6; i++) {
+				printf("%d ", nextyounger[i]);
+				}
+				printf("\n");
+				printf("%s", "nextolder: ");
+				for (int i = 0; i < 6; i++) {
+				printf("%d ", nextolder[i]);
+				}
+				printf("\n");
+				printf("%s", "*oldest: ");
+				printf("%d", *oldest);
+				printf("\n");
+				printf("%s", "*youngest: ");
+				printf("%d", *youngest);
+				printf("\n");
+				printf("%s", "index_in_cache: ");
+				for (int i = 0; i < 12; i++) {
+					printf("%d ", index_in_cache[i]);
+				}
+				printf("\n");
+				printf("%s", "*read: ");
+				printf("%d", *read);
+				printf("\n");
+				printf("%s", "*write: ");
+				printf("%d", *write);
+				printf("\n");
+				printf("%s\n", "**************************************************");
 				//printf("%s\n", "help me find error");
-				//printf("%d ", id_Array[index_in_cache[id]]);
-				//printf("%d ", index_in_cache[id_Array[id]]);
-				//for (int i = 0; i < 6; i++) {
-				//	printf("%d ", id_Array[i]);
-				//}
 				//printf("\n");
-				//for (int i = 0; i < 12; i++) {
-				//	printf("%d ", index_in_cache[i]);
-				//}
-				//printf("\n");
+				*/
 				(*global_time)++;
 				//I am index_in_cache[id] and I will become the youngest.
 				if (index_in_cache[id] >= 0) {
 					timestamps[index_in_cache[id]] = (*global_time);
 					write_or_no[index_in_cache[id]] = write_or_not;
-					//id_Array[*oldest] = id;
-					nextolder[index_in_cache[id]] = *youngest;
+					
+					if (index_in_cache[id] == *oldest) {
+						*oldest = nextyounger[index_in_cache[id]];
+						nextolder[*oldest] = -1;
+						nextyounger[index_in_cache[id]] = -1;
+						nextyounger[*youngest] = index_in_cache[id];
+						nextolder[index_in_cache[id]] = *youngest;
+						*youngest = index_in_cache[id];
+					}
+					else if (index_in_cache[id] == *youngest) {
+						//do nothing
+					}
+					else {
+						nextolder[nextyounger[index_in_cache[id]]] = nextolder[index_in_cache[id]];
+						nextyounger[nextolder[index_in_cache[id]]] = nextyounger[index_in_cache[id]];
+						nextyounger[index_in_cache[id]] = -1;
+						nextyounger[*youngest] = index_in_cache[id];
+						nextolder[index_in_cache[id]] = *youngest;
+						*youngest = index_in_cache[id];
+					}
+					
 
-					nextolder[nextyounger[index_in_cache[id]]] = nextolder[index_in_cache[id]];
-					nextyounger[nextolder[index_in_cache[id]]] = nextyounger[index_in_cache[id]];
-
-					nextyounger[*youngest] = index_in_cache[id];
-					*youngest = index_in_cache[id];
 				}
 			//I am *oldest (I will be replaced by id) and my position will be filled by the *youngest.
+			//if not in cache
 				if (index_in_cache[id] == -1) {
 					if (write_or_no[*oldest] == 1) (*write)++;
 					(*read)++;
 					if(id_Array[*oldest] >= 0)
 					   index_in_cache[id_Array[*oldest]] = -1;
 					id_Array[*oldest] = id;
+					//I am *oldest
 					write_or_no[*oldest] = write_or_not;
 					timestamps[*oldest] = (*global_time);
 					nextolder[*oldest] = *youngest;
-					nextolder[nextyounger[*oldest]] = -1;
 					nextyounger[*youngest] = *oldest;
 					*youngest = *oldest;
+					//
 					*oldest = nextyounger[*oldest];
-					nextyounger[*youngest] = -1;
 					index_in_cache[id] = *youngest;
-					//printf("\n");
+					nextolder[*oldest] = -1;
+					nextyounger[*youngest] = -1;
 				}
+
 				return 0;
 			}
 
@@ -116,6 +169,7 @@ int main(int argc, char ** argv) {
 
 	int oldest = 0;
 	int youngest = M - 1;
+
 
 	//start counting from 0 to keep consistency
 	for (int i = 0; i < M; i++) {
@@ -221,9 +275,9 @@ for (i = 0; i < n; i++) {
 	int ib, jb, kb, b, io;
 	b = 1;
 
-	ib = b;
-	jb = b;
-	kb = b;
+	bi = b;
+	bj = b;
+	bk = 1;
 
 	for(i = 0; i < n; i += bi){
  		for(j = 0; j < n; j += bj){
@@ -235,12 +289,20 @@ for (i = 0; i < n; i++) {
 							cache_functionLRU ( M, &global_time, 0, Aid[ib][kb], id_Array, timestamps, write_or_no, nextyounger, nextolder, &oldest, &youngest, &read, &write, index_in_cache);
 							cache_functionLRU ( M, &global_time, 0, Bid[kb][jb], id_Array, timestamps, write_or_no, nextyounger, nextolder, &oldest, &youngest, &read, &write, index_in_cache);
 							cache_functionLRU ( M, &global_time, 1, Cid[ib][jb], id_Array, timestamps, write_or_no, nextyounger, nextolder, &oldest, &youngest, &read, &write, index_in_cache);
+							//return 0;
+							
 						}
+						//return 0;
 					}
+					//return 0;
 				}
+				//return 0;
 			}
+			//return 0;
 		}
+		//return 0;
 	}
+	
 	for (int p = 0; p < M; p++) if (write_or_no[p] == 1) write++;
 	io = read + write;	
 /*************************************************************/
@@ -250,7 +312,7 @@ for (int i = 0; i < n; i++) {
 		errorval = sqrt(cminusdsquare);
 	}
 }
-	printf("%d, %d, %d,\n", read, write, io);
+	printf("read: %d, write: %d, communication: %d\n", read, write, io);
 
 
 	for(i = 0; i < n; i++){
