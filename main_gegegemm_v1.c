@@ -2,6 +2,18 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
+#include <sys/time.h>
+
+static inline double get_current_time( )
+{
+	struct timeval tp;
+	gettimeofday(&tp, NULL);
+	return (double)tp.tv_sec+(1.e-6)*tp.tv_usec;
+}
+
+
+
+
 
 			int cache_functionLRU (int M, int *time, int ischanged, int id, 
 						int *isincache, int *timestamps, int *changed,
@@ -44,6 +56,8 @@ int main(int argc, char ** argv) {
 	double **A, **B, **C, **D;
 	double normA, normR, tmp;
 	int bi, bj, bk;
+	double elapsed;
+
 
 	srand(0);
 
@@ -203,6 +217,8 @@ for (i = 0; i < n; i++) {
 	kb = b;
 
 
+        elapsed = -get_current_time();
+
 	for(i = 0; i < n; i += bi){
  		for(j = 0; j < n; j += bj){
 			for(k = 0; k < n; k += bk){
@@ -226,6 +242,7 @@ for (i = 0; i < n; i++) {
 	io = read + write;
 			//evict tiles A, B, and C cache = 3n^2
 	
+        elapsed += get_current_time();
 			
 /*************************************************************/
 
@@ -273,7 +290,7 @@ for (int i = 0; i < n; i++) {
 	//printf("Communication = %10d;\n", io);
 	//printf(" %10d,", io);
 	//printf(" %10d %10d\n", read, write);
-	printf("%d, %d, %d, %d,\n", bk, read, write, io);
+	printf("%d, %d, %d, %d, %f\n", bk, read, write, io, elapsed);
 
 
 	for(i = 0; i < n; i++){
