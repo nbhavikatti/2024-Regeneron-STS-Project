@@ -1,3 +1,2 @@
 # cache
-Cache code - includes cache function. This project for Regeneron STS 2023 is about finding lower bounds of algorithms like matrix matrix multiplication and LU factorization for the many different cache
-policies (LRU, LFU, Explicit, etc.). Note that copy.c is O(1) cache simulator, while main is the O(M) cache simulator. 
+Cache code - includes cache function. This project for Regeneron STS 2023 is about finding lower bounds of algorithmic matrix-matrix multiplication for the many different cache policies (LRU, LFU, Explicit, etc.). The O(M) Cache Simulator function is easier to understand than the O(1) function, but is dependent in M because of the presence of for loops. The O(1) Cache Simulator uses double-chained arrays and is more complicated, but is independent of M in runtime. The Cache Simulators measure the amount of communication between the cache and the main memory when performing matrix-matrix multiplication.
